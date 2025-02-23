@@ -9,6 +9,26 @@ public class Main {
     private static boolean solutionFound = false;
     private static long iterationCount = 0; // Menyimpan jumlah percobaan
 
+    private static final String[] ANSI_COLORS = {
+        "\u001B[31m", // Merah
+        "\u001B[32m", // Hijau
+        "\u001B[33m", // Kuning
+        "\u001B[34m", // Biru
+        "\u001B[35m", // Ungu
+        "\u001B[36m", // Cyan
+        "\u001B[91m", // Merah terang
+        "\u001B[92m", // Hijau terang
+        "\u001B[93m", // Kuning terang
+        "\u001B[94m", // Biru terang
+        "\u001B[95m", // Ungu terang
+        "\u001B[96m", // Cyan terang
+        "\u001B[97m"  // Putih terang
+    };
+
+    private static final String ANSI_RESET = "\u001B[0m"; // Reset warna
+
+    private static HashMap<Character, String> colorMap = new HashMap<>();
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Masukkan nama file test case (contoh: test_case.txt): ");
@@ -16,6 +36,7 @@ public class Main {
 
         try {
             readInputFile(fileName);
+            initializeColors(); // Beri warna unik untuk setiap huruf
             board = new char[N][M];
             initializeBoard();
 
@@ -93,6 +114,22 @@ public class Main {
         }
         
         fileScanner.close();    }
+   
+    private static void initializeColors() {
+        List<String> colorList = new ArrayList<>(Arrays.asList(ANSI_COLORS));
+        Collections.shuffle(colorList); // Acak warna agar tidak berurutan
+
+        int colorIndex = 0;
+        for (String shape : puzzleShapes) {
+            for (char c : shape.toCharArray()) {
+                if (Character.isLetter(c) && !colorMap.containsKey(c)) {
+                    colorMap.put(c, colorList.get(colorIndex % colorList.size()));
+                    colorIndex++;
+                }
+            }
+        }
+    }
+
 
     private static void initializeBoard() {
         board = new char[N][M];
@@ -318,7 +355,12 @@ public class Main {
     private static void printBoard() {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < M; j++) {
-                System.out.print(board[i][j] + " ");
+                char c = board[i][j];
+                if (c == '.') {
+                    System.out.print(c + " ");
+                } else {
+                    System.out.print(colorMap.getOrDefault(c, ANSI_RESET) + c + ANSI_RESET + " ");
+                }
             }
             System.out.println();
         }
